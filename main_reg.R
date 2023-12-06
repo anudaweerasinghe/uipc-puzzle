@@ -45,16 +45,15 @@ differences <- us_treasury %>%
   select(Week, Rate.Diff)
 
 # Find the exchange rates at 5 years from the current dates 
-# use the `lead` function with approximate offset of 5 * 52 weeks
 
 num_weeks_in_a_year = 52
 weeks_in_5_years = num_weeks_in_a_year * 5
 
+# Add another column to the dataframe with the expected exchange rate at 5 years time 
 exchange$Week <- exchange$Week - weeks(weeks_in_5_years)
 rates_over_diffs <- differences %>% 
   inner_join(exchange, by="Week")
 
-# Add another column to the dataframe with the expected exchange rate at 5 years time 
 # Do a regression analysis on that vs. the actual exchange rate 
 
 reg <- lm(Rate.Diff ~ WeeklyAverage, data = rates_over_diffs)
