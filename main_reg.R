@@ -5,8 +5,11 @@ library(zoo)
 library(dplyr)
 library(lubridate)
 library(latex2exp)
+library(ggplot2)
 
-rm(list = ls())
+# setwd("~/econds")
+
+# rm(list = ls())
 us_treasury <- read_csv("data/INDEXCBOE_ TNX - Sheet1.csv")
 exchange <- read_csv("data/USD_JPY - Sheet1.csv")
 jpn_treasury <- read_csv("data/IRLTLT01JPM156N.csv")
@@ -35,6 +38,9 @@ us_treasury <- construct_weekly_averages(us_treasury)
 jpn_treasury <- construct_weekly_averages(jpn_treasury)
 exchange <- construct_weekly_averages(exchange)
 
+exchange <- exchange %>% 
+  mutate(WeeklyAverage = 1.0 / WeeklyAverage) # since we need P_($/Y)
+
 # Construct a dataframe that has the interest rate differential R_usd - R_yen
 
 jpn_treasury_to_use <- mutate(jpn_treasury, JPN.Avg = WeeklyAverage)
@@ -42,24 +48,39 @@ differences <- us_treasury %>%
   mutate(US.Avg = WeeklyAverage) %>%
   inner_join(jpn_treasury_to_use, by="Week") %>% 
   mutate(Rate.Diff = US.Avg - JPN.Avg) %>%
-  select(Week, Rate.Diff)
+  select(Week, Rate.Diff) # the Rate.Diff column stores R_$ - R_Y
 
 # Find the exchange rates at 5 years from the current dates 
-
 num_weeks_in_a_year = 52
 weeks_in_5_years = num_weeks_in_a_year * 5
 
-# Add another column to the dataframe with the expected exchange rate at 5 years time 
-exchange$Week <- exchange$Week - weeks(weeks_in_5_years)
+# first we construct a dataframe with the exchange rates moved 5 years into the future
+future <- exchange %>%
+  mutate(Week = Week - weeks(weeks_in_5_years)) %>% # we have to subtract 5 years from the Week column as this would allow each row to point to the exchange rate 5 years in the future
+  mutate(WeeklyFutureAverage = WeeklyAverage) %>% # WeeklyFutureAverage stores the Weekly Average exchange rate 5 years in the future
+  select(Week, WeeklyFutureAverage)
+
+exchange <- exchange %>% 
+  inner_join(future, by = "Week")
+
+# compute the percentage difference between the WeeklyAverage and WeeklyFutureAverage
+pct_diff <- function (x, y) {
+  return (y - x) / x * 100.0 
+}
+
+exchange <- exchange %>% 
+  mutate(Pct.Diff.Exch.Rate = pct_diff(WeeklyAverage, WeeklyFutureAverage))
+
 rates_over_diffs <- differences %>% 
   inner_join(exchange, by="Week")
 
-# Do a regression analysis on that vs. the actual exchange rate 
+reg <- lm(Pct.Diff.Exch.Rate ~ Rate.Diff, data = rates_over_diffs)
+summary(reg)
 
-reg <- lm(Rate.Diff ~ WeeklyAverage, data = rates_over_diffs)
-plot(rates_over_diffs$Rate.Diff, rates_over_diffs$WeeklyAverage, xlab = TeX(r'($R_{\$} - R_{Y}$)'), ylab = TeX(r'($P_{\frac{\$}{Y}}\right$ in 5 years time)'))
-
-# Try forward rates after that 
-
-# Thinking about other variables that beta might be related to
-
+ggplot(data = rates_over_diffs, aes(x = Rate.Diff, y = Pct.Diff.Exch.Rate)) + 
+  geom_point() + 
+  labs(
+    x = TeX(r'($R_{\$} - R_{Y}$)'),
+    y =  TeX(r'($\frac{P_{\frac{\$}{Y}}' - P_{\frac{\$}{Y}}}{P_{\frac{\$}{Y}}} \times 100\%$)'), 
+    title = "Uncovered Interest Rate Parity"
+  )
