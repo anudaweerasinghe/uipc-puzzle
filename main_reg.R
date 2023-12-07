@@ -9,7 +9,7 @@ library(ggplot2)
 
 # setwd("~/econds")
 
-# rm(list = ls())
+rm(list = ls())
 us_treasury <- read_csv("data/INDEXCBOE_ TNX - Sheet1.csv")
 exchange <- read_csv("data/USD_JPY - Sheet1.csv")
 jpn_treasury <- read_csv("data/IRLTLT01JPM156N.csv")
@@ -84,3 +84,4 @@ ggplot(data = rates_over_diffs, aes(x = Rate.Diff, y = Pct.Diff.Exch.Rate)) +
     y =  TeX(r'($\frac{P_{\frac{\$}{Y}}' - P_{\frac{\$}{Y}}}{P_{\frac{\$}{Y}}} \times 100\%$)'), 
     title = "Uncovered Interest Rate Parity"
   )
+
