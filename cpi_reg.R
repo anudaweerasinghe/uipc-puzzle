@@ -13,6 +13,9 @@ us_treasury <- read_csv("data/uk_fred/us_10year_fred.csv")
 uk_treasury <- read_csv("data/uk_fred/uk_10year_fred.csv")
 exchange <- read_csv("data/uk_fred/usd-gbp-fred.csv")
 
+uk_cpi <- read_csv("data/uk_fred/uk_cpi.csv")
+us_cpi <- read_csv("data/uk_fred/us_cpi.csv")
+
 us_treasury$DATE <- as.POSIXct(us_treasury$DATE)
 us_treasury <- us_treasury %>% 
   mutate(Date = DATE) %>% 
@@ -31,13 +34,44 @@ exchange <- exchange %>%
   mutate(Close = USUKFXUKM) %>% 
   select(Date, Close)
 
+pct_diff <- function (x, y) {
+  return (100 * ((y - x) / x))
+}
 
+
+uk_cpi$Date <- as.POSIXct(uk_cpi$DATE)
+uk_cpi <- uk_cpi %>% 
+  mutate(UK.cpi = GBRCPIALLMINMEI) %>% 
+  select(Date, UK.cpi)
+
+us_cpi$Date <- as.POSIXct(us_cpi$DATE)
+us_cpi <- us_cpi %>% 
+  mutate(US.cpi = CPALTT01USM661S) %>% 
+  select(Date, US.cpi)
+
+cpi <- us_cpi %>%
+  inner_join(uk_cpi, by="Date")
+
+future_cpi <- cpi %>%
+  mutate(Date = Date - years(10)) %>%
+  mutate(US.cpi.future = US.cpi) %>%
+  mutate(UK.cpi.future = UK.cpi) %>%
+  select(Date, US.cpi.future, UK.cpi.future)
+
+inflation <- cpi %>%
+  inner_join(future_cpi, by="Date")
+
+inflation <- inflation %>%
+  mutate(US.inflation = pct_diff(US.cpi, US.cpi.future)) %>%
+  mutate(UK.inflation = pct_diff(UK.cpi, UK.cpi.future)) %>%
+  select(Date, US.inflation, UK.inflation)
 
 differences <- us_treasury %>%
-  inner_join(uk_treasury, by="Date")
+  inner_join(uk_treasury, by="Date") %>%
+  inner_join(inflation, by="Date")
 
 differences <- differences %>%
-  mutate(r_delta = US.r - UK.r) %>%
+  mutate(r_delta = (US.r-US.inflation) - (UK.r-UK.inflation)) %>%
   select(Date, r_delta)
 
 future_exchange_rates <- exchange %>%
@@ -50,9 +84,6 @@ exchange <- exchange %>%
   mutate(CurrentRate = Close) %>%
   select(Date, CurrentRate, FutureRate)
 
-pct_diff <- function (x, y) {
-  return (((y - x) / x) * 100.0) 
-}
 
 exchange <- exchange %>% 
   mutate(Pct.Diff.Exch.Rate = pct_diff(CurrentRate, FutureRate))
