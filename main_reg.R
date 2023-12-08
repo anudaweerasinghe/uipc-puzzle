@@ -44,6 +44,7 @@ exchange <- exchange %>%
   mutate(Price = 1.0 / Price)
 
 # Construct a dataframe that has the interest rate differential R_usd - R_yen
+
 differences <- interest_rate_diff(us_treasury, jpn_treasury)
 
 # Find the exchange rates at 5 years from the current dates
@@ -68,6 +69,7 @@ exchange <- exchange_five_years %>%
 # the WeeklyAverage and WeeklyFutureAverage
 pct_diff <- function(x, y) {
   return(y - x) / x * 100.0
+
 }
 
 exchange <- exchange %>%
