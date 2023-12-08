@@ -47,12 +47,12 @@ jpn_treasury_to_use <- mutate(jpn_treasury, JPN.Avg = WeeklyAverage)
 differences <- us_treasury %>% 
   mutate(US.Avg = WeeklyAverage) %>%
   inner_join(jpn_treasury_to_use, by="Week") %>% 
-  mutate(Rate.Diff = US.Avg - JPN.Avg) %>%
+  mutate(Rate.Diff = (US.Avg) - (JPN.Avg)) %>%
   select(Week, Rate.Diff) # the Rate.Diff column stores R_$ - R_Y
 
 # Find the exchange rates at 5 years from the current dates 
 num_weeks_in_a_year = 52
-weeks_in_5_years = num_weeks_in_a_year * 5
+weeks_in_5_years = num_weeks_in_a_year * 10
 
 # first we construct a dataframe with the exchange rates moved 5 years into the future
 future <- exchange %>%
@@ -65,7 +65,7 @@ exchange <- exchange %>%
 
 # compute the percentage difference between the WeeklyAverage and WeeklyFutureAverage
 pct_diff <- function (x, y) {
-  return (y - x) / x * 100.0 
+  return ((y - x) / x) * 100.0 
 }
 
 exchange <- exchange %>% 
