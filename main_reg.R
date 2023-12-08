@@ -49,7 +49,7 @@ differences <- interest_rate_diff(us_treasury, jpn_treasury)
 
 # Find the exchange rates at 5 years from the current dates
 num_weeks_in_a_year <- 52
-weeks_in_5_years <- num_weeks_in_a_year * 5
+weeks_in_5_years <- num_weeks_in_a_year * 10
 
 timeoffsets <- c(weeks_in_5_years)
 exchange_futures <- time_offset_exchange(exchange, timeoffsets, "weeks")
@@ -68,7 +68,7 @@ exchange <- exchange_five_years %>%
 # compute the percentage difference between
 # the WeeklyAverage and WeeklyFutureAverage
 pct_diff <- function(x, y) {
-  return(y - x) / x * 100.0
+  return ((y - x) / x )* 100.0
 
 }
 
