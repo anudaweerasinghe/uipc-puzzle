@@ -72,3 +72,28 @@ ggplot(data = final_df, aes(x = r_delta, y = Pct.Diff.Exch.Rate)) +
     y =  TeX(r'($\frac{P_{\frac{\$}{GBP}}' - P_{\frac{\$}{GBP}}}{P_{\frac{\$}{GBP}}} \times 100\%$)'), 
     title = "Uncovered Interest Rate Parity"
   )
+
+
+getDecade <- function (d) {
+  # Extract the year from the timestamp
+  year <- year(d)
+  # Calculate the decade by dividing the year by 10 and rounding down
+  decade <- 10 * floor(year / 10)
+  # Convert the decade to a string and return it
+  return(as.character(decade))
+}
+
+final_df <- final_df %>%
+  mutate(Decade = getDecade(Date))
+
+decades_reg <- lm(Pct.Diff.Exch.Rate ~ r_delta*Decade, data = final_df)
+summary(decades_reg)
+
+final_df %>% ggplot( aes(x = r_delta, y = Pct.Diff.Exch.Rate)) + 
+  geom_point(aes(color = Decade),alpha = 0.25) + 
+  labs(
+    x = TeX(r'($R_{\$} - R_{GBP}$)'),
+    y =  TeX(r'($\frac{P_{\frac{\$}{GBP}}' - P_{\frac{\$}{GBP}}}{P_{\frac{\$}{GBP}}} \times 100\%$)'), 
+    title = "Uncovered Interest Rate Parity over the Decades"
+  ) + geom_smooth(method = "lm", mapping = aes(x = r_delta, y = Pct.Diff.Exch.Rate, color = Decade), se = FALSE)
+
