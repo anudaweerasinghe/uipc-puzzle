@@ -89,3 +89,6 @@ ggplot(data = rates_over_diffs, aes(x = Rate.Diff, y = Pct.Diff.Exch.Rate)) +
     - P_{\frac{\$}{Y}}}{P_{\frac{\$}{Y}}} \times 100\%$)"),
     title = "Uncovered Interest Rate Parity"
   )
+
+
+
