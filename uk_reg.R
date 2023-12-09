@@ -31,8 +31,6 @@ exchange <- exchange %>%
   mutate(Close = USUKFXUKM) %>% 
   select(Date, Close)
 
-
-
 differences <- us_treasury %>%
   inner_join(uk_treasury, by="Date")
 
@@ -72,3 +70,85 @@ ggplot(data = final_df, aes(x = r_delta, y = Pct.Diff.Exch.Rate)) +
     y =  TeX(r'($\frac{P_{\frac{\$}{GBP}}' - P_{\frac{\$}{GBP}}}{P_{\frac{\$}{GBP}}} \times 100\%$)'), 
     title = "Uncovered Interest Rate Parity"
   )
+ggsave("data/uipc/uipc.png", height = 6, width = 10)
+
+final_df$decade <- floor_date(final_df$Date, unit = years(10))
+get_alpha <- function(Pct.Diff.Exch.Rate, r_delta) {
+  reg <- lm(Pct.Diff.Exch.Rate ~ r_delta)
+  return(reg$coefficients[1])
+}
+
+get_beta <- function(Pct.Diff.Exch.Rate, r_delta) {
+  reg <- lm(Pct.Diff.Exch.Rate ~ r_delta)
+  return(reg$coefficients[2])
+}
+
+final_df <- final_df %>%
+  group_by(decade) %>%
+  mutate(
+         alpha = get_alpha(Pct.Diff.Exch.Rate, r_delta),
+         beta = get_beta(Pct.Diff.Exch.Rate, r_delta),
+         var = sd(Pct.Diff.Exch.Rate) * sd(Pct.Diff.Exch.Rate))
+
+var_alpha_beta <- final_df %>%
+  select(decade, var, alpha, beta) %>% 
+  distinct()
+var_alpha_beta$last_decade_var <- lag(var_alpha_beta$var, 1)
+
+ggplot(data = var_alpha_beta, aes(x = var, y = alpha)) + 
+  geom_point() +
+  labs(
+    x = "Variance of Exchange Rates in Current Decade", 
+    y = "Alpha",
+    title = "Variation of Alpha by the Exchange Rate Volatility"
+  ) +
+  stat_smooth(method = "lm",
+              formula = y ~ x,
+              geom = "smooth",
+              se = FALSE) 
+ggsave("data/variance/alpha-current-decade.png", height = 6, width = 10)
+
+ggplot(data = var_alpha_beta, aes(x = last_decade_var, y = alpha)) + 
+  geom_point() +
+  labs(
+    x = "Variance of Exchange Rates in Current Decade", 
+    y = "Alpha",
+    title = "Variation of Alpha by the Exchange Rate Volatility"
+  ) +
+  stat_smooth(method = "lm",
+              formula = y ~ x,
+              geom = "smooth",
+              se = FALSE) 
+ggsave("data/variance/alpha-last-decade.png", height = 6, width = 10)
+
+std_alpha_beta <- final_df %>%
+  select(decade, std, alpha, beta) %>% 
+  distinct()
+std_alpha_beta$last_decade_std <- lag(std_alpha_beta$std, 1)
+
+ggplot(data = std_alpha_beta, aes(x = std, y = alpha)) + 
+  geom_point() +
+  labs(
+    x = "Standard Deviation of Exchange Rates in Current Decade", 
+    y = "Alpha",
+    title = "Variation of Alpha by the Exchange Rate Volatility"
+  ) +
+  stat_smooth(method = "lm",
+              formula = y ~ x,
+              geom = "smooth",
+              se = FALSE) 
+ggsave("data/stdev/alpha-current-decade-std.png", height = 6, width = 10)
+
+ggplot(data = std_alpha_beta, aes(x = last_decade_std, y = alpha)) + 
+  geom_point() +
+  labs(
+    x = "Standard Deviation of Exchange Rates in Last Decade", 
+    y = "Alpha",
+    title = "Variation of Alpha by the Exchange Rate Volatility"
+  ) +
+  stat_smooth(method = "lm",
+              formula = y ~ x,
+              geom = "smooth",
+              se = FALSE) 
+ggsave("data/stdev/alpha-last-decade-std.png", height = 6, width = 10)
+
