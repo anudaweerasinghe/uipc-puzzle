@@ -76,7 +76,7 @@ ggplot(data = final_df, aes(x = r_delta, y = Pct.Diff.Exch.Rate)) +
   labs(
     x = TeX(r'($R_{\$} - R_{RUB}=$Percentage Difference between 10-year bond yield in the US and Russia)'),
     y =  TeX(r'($\frac{P_{\frac{\$}{RUB}}' - P_{\frac{\$}{RUB}}}{P_{\frac{\$}{RUB}}} \times 100\%$= Percentage Change in $P_{\frac{\$}{RUB}}$)'), 
-    title = "Figure 1 - UIPC doesn't hold for Russia due to Lack of (1) Floating Exchange Rate and (2) Perfect Capital Mobility",
+    title = "Figure 1 - UIPC doesn't hold for Russia due to Lack of (1) Floating Exchange Rate and \n(2) Perfect Capital Mobility",
     caption = "Based on data from 2001-2013. Source: FRED"
   )
 ggsave("plots/Fig1-RUS_UIPC.png", height = 5, width = 9)
