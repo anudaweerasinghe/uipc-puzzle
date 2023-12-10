@@ -13,16 +13,20 @@ us_treasury <- read_csv("data/russia_fred/us_10year_fred.csv")
 rus_treasury <- read_csv("data/russia_fred/russia_10year.csv")
 exchange <- read_csv("data/russia_fred/rus_per_usd.csv")
 
+get10YrRate <- function(r){
+  return ((((1+(r/100))^10) - 1) * 100)
+}
+
 us_treasury$DATE <- as.POSIXct(us_treasury$DATE)
 us_treasury <- us_treasury %>% 
   mutate(Date = DATE) %>% 
-  mutate(US.r = IRLTLT01USM156N*10) %>% 
+  mutate(US.r = get10YrRate(IRLTLT01USM156N)) %>% 
   select(Date, US.r)
 
 rus_treasury$DATE <- as.POSIXct(rus_treasury$DATE)
 rus_treasury <- rus_treasury %>% 
   mutate(Date = DATE) %>% 
-  mutate(RUS.r = IRLTLT01RUM156N*10) %>% 
+  mutate(RUS.r = get10YrRate(IRLTLT01RUM156N)) %>% 
   select(Date, RUS.r)
 
 exchange$DATE <- as.POSIXct(exchange$DATE)
