@@ -68,14 +68,16 @@ summary(reg)
 
 
 ggplot(data = final_df, aes(x = r_delta, y = Pct.Diff.Exch.Rate)) + 
-  geom_point() + 
+  geom_point(alpha=0.25) +
+  theme_classic()+ 
   labs(
-    x = TeX(r'($R_{\$} - R_{GBP}$)'),
-    y =  TeX(r'($\frac{P_{\frac{\$}{GBP}}' - P_{\frac{\$}{GBP}}}{P_{\frac{\$}{GBP}}} \times 100\%$)'), 
-    title = "Uncovered Interest Rate Parity"
-  )
+    x = TeX(r'($R_{\$} - R_{GBP}=$Percentage Difference between 10-year bond yield in the US and UK)'),
+    y =  TeX(r'($\frac{P_{\frac{\$}{GBP}}' - P_{\frac{\$}{GBP}}}{P_{\frac{\$}{GBP}}} \times 100\%$= Percentage Change in $P_{\frac{\$}{GBP}}$)'), 
+    title = "Figure 2 - $/GBP Exchange Rates don't move as much as expected by UIPC",
+    caption = "Based on data from 1960-2007. Source: FRED"
+  )+geom_smooth(method = "lm", mapping = aes(x = r_delta, y = Pct.Diff.Exch.Rate), se = FALSE)
 
-ggsave("plots/uipc/uipc.png", height = 6, width = 10)
+ggsave("plots/Fig2-UK_UIPC.png", height = 5, width = 9)
 
 final_df$decade <- floor_date(final_df$Date, unit = years(10))
 get_alpha <- function(Pct.Diff.Exch.Rate, r_delta) {
@@ -95,67 +97,6 @@ final_df <- final_df %>%
          beta = get_beta(Pct.Diff.Exch.Rate, r_delta),
          var = sd(Pct.Diff.Exch.Rate) * sd(Pct.Diff.Exch.Rate))
 
-var_alpha_beta <- final_df %>%
-  select(decade, var, alpha, beta) %>% 
-  distinct()
-var_alpha_beta$last_decade_var <- lag(var_alpha_beta$var, 1)
-
-ggplot(data = var_alpha_beta, aes(x = var, y = alpha)) + 
-  geom_point() +
-  labs(
-    x = "Variance of Exchange Rates in Current Decade", 
-    y = "Alpha",
-    title = "Variation of Alpha by the Exchange Rate Volatility"
-  ) +
-  stat_smooth(method = "lm",
-              formula = y ~ x,
-              geom = "smooth",
-              se = FALSE) 
-ggsave("plots/variance/alpha-current-decade.png", height = 6, width = 10)
-
-ggplot(data = var_alpha_beta, aes(x = last_decade_var, y = alpha)) + 
-  geom_point() +
-  labs(
-    x = "Variance of Exchange Rates in Current Decade", 
-    y = "Alpha",
-    title = "Variation of Alpha by the Exchange Rate Volatility"
-  ) +
-  stat_smooth(method = "lm",
-              formula = y ~ x,
-              geom = "smooth",
-              se = FALSE) 
-ggsave("plots/variance/alpha-last-decade.png", height = 6, width = 10)
-
-std_alpha_beta <- final_df %>%
-  select(decade, std, alpha, beta) %>% 
-  distinct()
-std_alpha_beta$last_decade_std <- lag(std_alpha_beta$std, 1)
-
-ggplot(data = std_alpha_beta, aes(x = std, y = alpha)) + 
-  geom_point() +
-  labs(
-    x = "Standard Deviation of Exchange Rates in Current Decade", 
-    y = "Alpha",
-    title = "Variation of Alpha by the Exchange Rate Volatility"
-  ) +
-  stat_smooth(method = "lm",
-              formula = y ~ x,
-              geom = "smooth",
-              se = FALSE) 
-ggsave("plots/stdev/alpha-current-decade-std.png", height = 6, width = 10)
-
-ggplot(data = std_alpha_beta, aes(x = last_decade_std, y = alpha)) + 
-  geom_point() +
-  labs(
-    x = "Standard Deviation of Exchange Rates in Last Decade", 
-    y = "Alpha",
-    title = "Variation of Alpha by the Exchange Rate Volatility"
-  ) +
-  stat_smooth(method = "lm",
-              formula = y ~ x,
-              geom = "smooth",
-              se = FALSE) 
-ggsave("plots/stdev/alpha-last-decade-std.png", height = 6, width = 10)
 
 getDecade <- function (d) {
   # Extract the year from the timestamp
@@ -173,11 +114,15 @@ decades_reg <- lm(Pct.Diff.Exch.Rate ~ r_delta*Decade, data = final_df)
 summary(decades_reg)
 
 final_df %>% ggplot( aes(x = r_delta, y = Pct.Diff.Exch.Rate)) + 
-  geom_point(aes(color = Decade),alpha = 0.25) + 
+  geom_point(aes(color = Decade),alpha = 0.25)+
+  geom_smooth(method = "lm", mapping = aes(x = r_delta, y = Pct.Diff.Exch.Rate, color = Decade), se = FALSE) +
+  theme_classic()+ 
   labs(
-    x = TeX(r'($R_{\$} - R_{GBP}$)'),
-    y =  TeX(r'($\frac{P_{\frac{\$}{GBP}}' - P_{\frac{\$}{GBP}}}{P_{\frac{\$}{GBP}}} \times 100\%$)'), 
-    title = "Uncovered Interest Rate Parity over the Decades"
-  ) + geom_smooth(method = "lm", mapping = aes(x = r_delta, y = Pct.Diff.Exch.Rate, color = Decade), se = FALSE)
+    x = TeX(r'($R_{\$} - R_{GBP}=$Percentage Difference between 10-year bond yield in the US and UK)'),
+    y =  TeX(r'($\frac{P_{\frac{\$}{GBP}}' - P_{\frac{\$}{GBP}}}{P_{\frac{\$}{GBP}}} \times 100\%$= Percentage Change in $P_{\frac{\$}{GBP}}$)'), 
+    title = "Figure 3 - Agreement with UIPC differs by Decade for $/GBP",
+    caption = "Based on data from 1960-2007. Source: FRED"
+  )
+ggsave("plots/Fig3-UK_UIPC_decades.png", height = 5, width = 9)
 
 

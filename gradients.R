@@ -84,10 +84,14 @@ final_df$gradients <- mapply(calculate_gradients_within_range, final_df$Date, li
 reg <- lm(Pct.Diff.Exch.Rate ~ gradients * r_delta, data = final_df)
 summary(reg)
 interplot(reg, var1 = "r_delta", var2 = "gradients") + 
-  xlab('Yearly Increase in USD to GBP Exchange Rate') +
-  ylab(TeX(r"($\beta$)")) +
-  ggtitle('Estimated Effect of \nYearly Change in Exchange Rate on β') +
+  labs(
+    x='Yearly Change in USD to GBP Exchange Rate over Past Four Years',
+    y=TeX(r"($\beta$ in UIPC Regression)"),
+    title='Figure 4 - Estimated Effect of Yearly Change in Exchange Rate over Previous 4 Years on β',
+    caption='Based on data from 1960-2007. Source: FRED'
+  )+
   theme_classic() + geom_hline(yintercept = 1, linetype = "dashed")
+ggsave("plots/Fig4-UK_gradients_interplot.png", height = 5, width = 9)
 
 # need to remove the NA gradients so that reg and orig have the same number of data points
 final_df <- final_df %>% 
