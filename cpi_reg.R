@@ -19,13 +19,13 @@ us_cpi <- read_csv("data/uk_fred/us_cpi.csv")
 us_treasury$DATE <- as.POSIXct(us_treasury$DATE)
 us_treasury <- us_treasury %>% 
   mutate(Date = DATE) %>% 
-  mutate(US.r = IRLTLT01USM156N*10) %>% 
+  mutate(US.r = 1 - ((1 + IRLTLT01USM156N/100)^10) * 100) %>% 
   select(Date, US.r)
 
 uk_treasury$DATE <- as.POSIXct(uk_treasury$DATE)
 uk_treasury <- uk_treasury %>% 
   mutate(Date = DATE) %>% 
-  mutate(UK.r = IRLTLT01GBM156N*10) %>% 
+  mutate(UK.r = 1 - ((1 + IRLTLT01GBM156N/100)^10) * 100) %>% 
   select(Date, UK.r)
 
 exchange$DATE <- as.POSIXct(exchange$DATE)
