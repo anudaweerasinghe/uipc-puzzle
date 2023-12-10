@@ -66,7 +66,7 @@ compute_gradient <- function(Date, CurrentRate) {
 }
 
 calculate_gradients_within_range <- function(date, df) {
-  start_date <- date - years(5)
+  start_date <- date - years(4)
   end_date <- date
   
   # Filter data within the 5-year range
@@ -89,3 +89,10 @@ interplot(reg, var1 = "r_delta", var2 = "gradients") +
   ggtitle('Estimated Effect of \nYearly Change in Exchange Rate on β') +
   theme_classic() + geom_hline(yintercept = 1, linetype = "dashed")
 
+# need to remove the NA gradients so that reg and orig have the same number of data points
+final_df <- final_df %>% 
+  drop_na(gradients)
+
+orig <- lm(Pct.Diff.Exch.Rate ~ r_delta, data = final_df)
+summary(orig)
+anova(orig, reg)
