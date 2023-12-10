@@ -13,16 +13,20 @@ us_treasury <- read_csv("data/uk_fred/us_10year_fred.csv")
 uk_treasury <- read_csv("data/uk_fred/uk_10year_fred.csv")
 exchange <- read_csv("data/uk_fred/usd-gbp-fred.csv")
 
+get10YrRate <- function(r){
+  return ((((1+(r/100))^10) - 1) * 100)
+}
+
 us_treasury$DATE <- as.POSIXct(us_treasury$DATE)
 us_treasury <- us_treasury %>% 
   mutate(Date = DATE) %>% 
-  mutate(US.r = IRLTLT01USM156N*10) %>% 
+  mutate(US.r = get10YrRate(IRLTLT01USM156N)) %>% 
   select(Date, US.r)
 
 uk_treasury$DATE <- as.POSIXct(uk_treasury$DATE)
 uk_treasury <- uk_treasury %>% 
   mutate(Date = DATE) %>% 
-  mutate(UK.r = IRLTLT01GBM156N*10) %>% 
+  mutate(UK.r = get10YrRate(IRLTLT01GBM156N)) %>% 
   select(Date, UK.r)
 
 exchange$DATE <- as.POSIXct(exchange$DATE)
@@ -71,7 +75,7 @@ ggplot(data = final_df, aes(x = r_delta, y = Pct.Diff.Exch.Rate)) +
     title = "Uncovered Interest Rate Parity"
   )
 
-ggsave("data/uipc/uipc.png", height = 6, width = 10)
+ggsave("plots/uipc/uipc.png", height = 6, width = 10)
 
 final_df$decade <- floor_date(final_df$Date, unit = years(10))
 get_alpha <- function(Pct.Diff.Exch.Rate, r_delta) {
@@ -107,7 +111,7 @@ ggplot(data = var_alpha_beta, aes(x = var, y = alpha)) +
               formula = y ~ x,
               geom = "smooth",
               se = FALSE) 
-ggsave("data/variance/alpha-current-decade.png", height = 6, width = 10)
+ggsave("plots/variance/alpha-current-decade.png", height = 6, width = 10)
 
 ggplot(data = var_alpha_beta, aes(x = last_decade_var, y = alpha)) + 
   geom_point() +
@@ -120,7 +124,7 @@ ggplot(data = var_alpha_beta, aes(x = last_decade_var, y = alpha)) +
               formula = y ~ x,
               geom = "smooth",
               se = FALSE) 
-ggsave("data/variance/alpha-last-decade.png", height = 6, width = 10)
+ggsave("plots/variance/alpha-last-decade.png", height = 6, width = 10)
 
 std_alpha_beta <- final_df %>%
   select(decade, std, alpha, beta) %>% 
@@ -138,7 +142,7 @@ ggplot(data = std_alpha_beta, aes(x = std, y = alpha)) +
               formula = y ~ x,
               geom = "smooth",
               se = FALSE) 
-ggsave("data/stdev/alpha-current-decade-std.png", height = 6, width = 10)
+ggsave("plots/stdev/alpha-current-decade-std.png", height = 6, width = 10)
 
 ggplot(data = std_alpha_beta, aes(x = last_decade_std, y = alpha)) + 
   geom_point() +
@@ -151,7 +155,7 @@ ggplot(data = std_alpha_beta, aes(x = last_decade_std, y = alpha)) +
               formula = y ~ x,
               geom = "smooth",
               se = FALSE) 
-ggsave("data/stdev/alpha-last-decade-std.png", height = 6, width = 10)
+ggsave("plots/stdev/alpha-last-decade-std.png", height = 6, width = 10)
 
 getDecade <- function (d) {
   # Extract the year from the timestamp
