@@ -79,4 +79,4 @@ ggplot(data = final_df, aes(x = r_delta, y = Pct.Diff.Exch.Rate)) +
     title = "Figure 1 - UIPC doesn't hold for Russia due to Lack of (1) Floating Exchange Rate and (2) Perfect Capital Mobility",
     caption = "Based on data from 2001-2013. Source: FRED"
   )
-ggsave("plots/Fig1-RUS_UIPC.png", height = 9, width = 16)
+ggsave("plots/Fig1-RUS_UIPC.png", height = 5, width = 9)

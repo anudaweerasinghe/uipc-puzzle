@@ -91,7 +91,7 @@ interplot(reg, var1 = "r_delta", var2 = "gradients") +
     caption='Based on data from 1960-2007. Source: FRED'
   )+
   theme_classic() + geom_hline(yintercept = 1, linetype = "dashed")
-ggsave("plots/Fig4-UK_gradients_interplot.png", height = 9, width = 16)
+ggsave("plots/Fig4-UK_gradients_interplot.png", height = 5, width = 9)
 
 # need to remove the NA gradients so that reg and orig have the same number of data points
 final_df <- final_df %>% 

@@ -77,7 +77,7 @@ ggplot(data = final_df, aes(x = r_delta, y = Pct.Diff.Exch.Rate)) +
     caption = "Based on data from 1960-2007. Source: FRED"
   )+geom_smooth(method = "lm", mapping = aes(x = r_delta, y = Pct.Diff.Exch.Rate), se = FALSE)
 
-ggsave("plots/Fig2-UK_UIPC.png", height = 9, width = 16)
+ggsave("plots/Fig2-UK_UIPC.png", height = 5, width = 9)
 
 final_df$decade <- floor_date(final_df$Date, unit = years(10))
 get_alpha <- function(Pct.Diff.Exch.Rate, r_delta) {
@@ -123,6 +123,6 @@ final_df %>% ggplot( aes(x = r_delta, y = Pct.Diff.Exch.Rate)) +
     title = "Figure 3 - Agreement with UIPC differs by Decade for $/GBP",
     caption = "Based on data from 1960-2007. Source: FRED"
   )
-ggsave("plots/Fig3-UK_UIPC_decades.png", height = 9, width = 16)
+ggsave("plots/Fig3-UK_UIPC_decades.png", height = 5, width = 9)
 
 
