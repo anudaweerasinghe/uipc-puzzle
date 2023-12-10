@@ -83,5 +83,9 @@ final_df$gradients <- mapply(calculate_gradients_within_range, final_df$Date, li
 
 reg <- lm(Pct.Diff.Exch.Rate ~ gradients * r_delta, data = final_df)
 summary(reg)
-interplot(reg, var1 = "r_delta", var2 = "gradients" )
+interplot(reg, var1 = "r_delta", var2 = "gradients") + 
+  xlab('Yearly Increase in USD to GBP Exchange Rate') +
+  ylab(TeX(r"($\beta$)")) +
+  ggtitle('Estimated Effect of \nYearly Change in Exchange Rate on β') +
+  theme_classic() + geom_hline(yintercept = 1, linetype = "dashed")
 
