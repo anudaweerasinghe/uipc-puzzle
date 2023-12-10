@@ -95,66 +95,6 @@ final_df <- final_df %>%
          beta = get_beta(Pct.Diff.Exch.Rate, r_delta),
          var = sd(Pct.Diff.Exch.Rate) * sd(Pct.Diff.Exch.Rate))
 
-var_alpha_beta <- final_df %>%
-  select(decade, var, alpha, beta) %>% 
-  distinct()
-var_alpha_beta$last_decade_var <- lag(var_alpha_beta$var, 1)
-
-ggplot(data = var_alpha_beta, aes(x = var, y = alpha)) + 
-  geom_point() +
-  labs(
-    x = "Variance of Exchange Rates in Current Decade", 
-    y = "Alpha",
-    title = "Variation of Alpha by the Exchange Rate Volatility"
-  ) +
-  stat_smooth(method = "lm",
-              formula = y ~ x,
-              geom = "smooth",
-              se = FALSE) 
-ggsave("plots/variance/alpha-current-decade.png", height = 6, width = 10)
-
-ggplot(data = var_alpha_beta, aes(x = last_decade_var, y = alpha)) + 
-  geom_point() +
-  labs(
-    x = "Variance of Exchange Rates in Current Decade", 
-    y = "Alpha",
-    title = "Variation of Alpha by the Exchange Rate Volatility"
-  ) +
-  stat_smooth(method = "lm",
-              formula = y ~ x,
-              geom = "smooth",
-              se = FALSE) 
-ggsave("plots/variance/alpha-last-decade.png", height = 6, width = 10)
-
-std_alpha_beta <- final_df %>%
-  select(decade, std, alpha, beta) %>% 
-  distinct()
-std_alpha_beta$last_decade_std <- lag(std_alpha_beta$std, 1)
-
-ggplot(data = std_alpha_beta, aes(x = std, y = alpha)) + 
-  geom_point() +
-  labs(
-    x = "Standard Deviation of Exchange Rates in Current Decade", 
-    y = "Alpha",
-    title = "Variation of Alpha by the Exchange Rate Volatility"
-  ) +
-  stat_smooth(method = "lm",
-              formula = y ~ x,
-              geom = "smooth",
-              se = FALSE) 
-ggsave("plots/stdev/alpha-current-decade-std.png", height = 6, width = 10)
-
-ggplot(data = std_alpha_beta, aes(x = last_decade_std, y = alpha)) + 
-  geom_point() +
-  labs(
-    x = "Standard Deviation of Exchange Rates in Last Decade", 
-    y = "Alpha",
-    title = "Variation of Alpha by the Exchange Rate Volatility"
-  ) +
-  stat_smooth(method = "lm",
-              formula = y ~ x,
-              geom = "smooth",
-              se = FALSE) 
 ggsave("plots/stdev/alpha-last-decade-std.png", height = 6, width = 10)
 
 getDecade <- function (d) {
