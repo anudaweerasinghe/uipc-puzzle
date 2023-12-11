@@ -10,14 +10,16 @@ library(stargazer)
 
 rm(list = ls())
 
+# loading the data frames
 us_treasury <- read_csv("data/uk_fred/us_10year_fred.csv")
 uk_treasury <- read_csv("data/uk_fred/uk_10year_fred.csv")
 exchange <- read_csv("data/uk_fred/usd-gbp-fred.csv")
 
 get10YrRate <- function(r){
-  return ((((1+(r/100))^10) - 1) * 100)
+  return ((((1+(r/100))^10) - 1) * 100) # need to properly account for 10-year compound interest rates
 }
 
+# convert all dates to POSIXct format
 us_treasury$DATE <- as.POSIXct(us_treasury$DATE)
 us_treasury <- us_treasury %>% 
   mutate(Date = DATE) %>% 
@@ -39,10 +41,12 @@ exchange <- exchange %>%
 differences <- us_treasury %>%
   inner_join(uk_treasury, by="Date")
 
+# compute r_delta = R_$ - R_GBP
 differences <- differences %>%
   mutate(r_delta = US.r - UK.r) %>%
   dplyr::select(Date, r_delta)
 
+# compute future exchange rates (in 10 years)
 future_exchange_rates <- exchange %>%
   mutate(Date = Date - years(10)) %>%
   mutate(FutureRate = Close) %>%
@@ -53,6 +57,7 @@ exchange <- exchange %>%
   mutate(CurrentRate = Close) %>%
   dplyr::select(Date, CurrentRate, FutureRate)
 
+# percent difference in exchange rates
 pct_diff <- function (x, y) {
   return (((y - x) / x) * 100.0) 
 }
@@ -64,6 +69,7 @@ final_df <- differences %>%
   inner_join(exchange, by="Date") %>%
   dplyr::select(Date, r_delta, Pct.Diff.Exch.Rate)
 
+# compute the regression between percent difference of exchange rate and the difference in interest rates
 reg <- lm(Pct.Diff.Exch.Rate ~ r_delta, data = final_df)
 summary(reg)
 stargazer(reg, title = "Regression Results", label = "tab:regression", out = "latex/uipc_results.tex")
@@ -80,6 +86,7 @@ ggplot(data = final_df, aes(x = r_delta, y = Pct.Diff.Exch.Rate)) +
 
 ggsave("plots/Fig2-UK_UIPC.png", height = 5, width = 9)
 
+# try to check if there is any relationship between variance of exchange rate data and alpha, beta over each decade
 final_df$decade <- floor_date(final_df$Date, unit = years(10))
 get_alpha <- function(Pct.Diff.Exch.Rate, r_delta) {
   reg <- lm(Pct.Diff.Exch.Rate ~ r_delta)

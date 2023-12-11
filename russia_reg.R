@@ -9,14 +9,17 @@ library(ggplot2)
 
 rm(list = ls())
 
+# load in data
 us_treasury <- read_csv("data/russia_fred/us_10year_fred.csv")
 rus_treasury <- read_csv("data/russia_fred/russia_10year.csv")
 exchange <- read_csv("data/russia_fred/rus_per_usd.csv")
 
+# need to compute 10-year compounded interest rate
 get10YrRate <- function(r){
   return ((((1+(r/100))^10) - 1) * 100)
 }
 
+# set all dates to POSIXct format
 us_treasury$DATE <- as.POSIXct(us_treasury$DATE)
 us_treasury <- us_treasury %>% 
   mutate(Date = DATE) %>% 
@@ -36,8 +39,7 @@ exchange <- exchange %>%
   mutate(Close = 1/CCUSMA02RUM618N) %>% 
   select(Date, Close)
 
-
-
+# compute R_$ - R_RUB
 differences <- us_treasury %>%
   inner_join(rus_treasury, by="Date")
 
@@ -45,6 +47,7 @@ differences <- differences %>%
   mutate(r_delta = US.r - RUS.r) %>%
   select(Date, r_delta)
 
+# compute future exchange rates in 10 years
 future_exchange_rates <- exchange %>%
   mutate(Date = Date - years(10)) %>%
   mutate(FutureRate = Close) %>%
@@ -55,6 +58,7 @@ exchange <- exchange %>%
   mutate(CurrentRate = Close) %>%
   select(Date, CurrentRate, FutureRate)
 
+# compute percent change in exchange rates
 pct_diff <- function (x, y) {
   return (((y - x) / x) * 100.0) 
 }
@@ -66,9 +70,9 @@ final_df <- differences %>%
   inner_join(exchange, by="Date") %>%
   select(Date, r_delta, Pct.Diff.Exch.Rate)
 
+# perform regression on the percentage change in exchange rate and the difference in interest rates
 reg <- lm(Pct.Diff.Exch.Rate ~ r_delta, data = final_df)
 summary(reg)
-
 
 ggplot(data = final_df, aes(x = r_delta, y = Pct.Diff.Exch.Rate)) + 
   geom_point(alpha=0.5, position = "jitter") +

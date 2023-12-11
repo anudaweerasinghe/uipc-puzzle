@@ -9,10 +9,12 @@ library(ggplot2)
 
 rm(list = ls())
 
+# load in the data
 us_treasury <- read_csv("data/uk_fred/us_10year_fred.csv")
 uk_treasury <- read_csv("data/uk_fred/uk_10year_fred.csv")
 exchange <- read_csv("data/uk_fred/usd-gbp-fred.csv")
 
+# set all dates to POSIXct format
 us_treasury$DATE <- as.POSIXct(us_treasury$DATE)
 us_treasury <- us_treasury %>% 
   mutate(Date = DATE) %>% 
@@ -31,6 +33,7 @@ exchange <- exchange %>%
   mutate(Close = USUKFXUKM) %>% 
   dplyr::select(Date, Close)
 
+# compute differences in R_$ - R_GBP
 differences <- us_treasury %>%
   inner_join(uk_treasury, by="Date")
 
@@ -38,6 +41,7 @@ differences <- differences %>%
   mutate(r_delta = US.r - UK.r) %>%
   dplyr::select(Date, r_delta)
 
+# compute future exchange rates
 future_exchange_rates <- exchange %>%
   mutate(Date = Date - years(10)) %>%
   mutate(FutureRate = Close) %>%
@@ -48,6 +52,7 @@ exchange <- exchange %>%
   mutate(CurrentRate = Close) %>%
   dplyr::select(Date, CurrentRate, FutureRate)
 
+# compute percent difference in exchange rates
 pct_diff <- function (x, y) {
   return (((y - x) / x) * 100.0) 
 }
@@ -59,12 +64,14 @@ final_df <- differences %>%
   inner_join(exchange, by="Date") %>%
   dplyr::select(Date, r_delta, Pct.Diff.Exch.Rate, CurrentRate) 
 
+# compute gradient over a window of time
 compute_gradient <- function(Date, CurrentRate) {
   Date <- year(Date) + day(Date) / 365.25
   reg <- lm(CurrentRate ~ Date)
   return(reg$coefficients[2])
 }
 
+# use compute_gradient over 4-year window
 calculate_gradients_within_range <- function(date, df) {
   start_date <- date - years(4)
   end_date <- date
@@ -81,6 +88,7 @@ calculate_gradients_within_range <- function(date, df) {
 
 final_df$gradients <- mapply(calculate_gradients_within_range, final_df$Date, list(final_df))
 
+# add interactions to the regression between gradients and r_delta
 reg <- lm(Pct.Diff.Exch.Rate ~ gradients * r_delta, data = final_df)
 summary(reg)
 stargazer(reg, title = "Interaction Regression Results", label = "tab:regression", out = "latex/interaction_results.tex")
