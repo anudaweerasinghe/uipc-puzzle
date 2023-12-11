@@ -9,6 +9,8 @@ library(ggplot2)
 
 rm(list = ls())
 
+# this is basically a copy of gradients.R but for 6-month windows. 
+# for comments/documentation, refer to gradients.R
 us_treasury <- read_csv("data/uk_fred/us_10year_fred.csv")
 uk_treasury <- read_csv("data/uk_fred/uk_10year_fred.csv")
 exchange <- read_csv("data/uk_fred/usd-gbp-fred.csv")
