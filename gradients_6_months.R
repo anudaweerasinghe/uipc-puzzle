@@ -66,7 +66,7 @@ compute_gradient <- function(Date, CurrentRate) {
 }
 
 calculate_gradients_within_range <- function(date, df) {
-  start_date <- date - years(4)
+  start_date <- date - months(6)
   end_date <- date
   
   # Filter data within the 5-year range
@@ -86,13 +86,13 @@ summary(reg)
 stargazer(reg, title = "Interaction Regression Results", label = "tab:regression", out = "latex/interaction_results.tex")
 interplot(reg, var1 = "r_delta", var2 = "gradients") + 
   labs(
-    x='Yearly Change in USD to GBP Exchange Rate over Past Four Years',
+    x='Yearly Change in USD to GBP Exchange Rate over Past 6 Months',
     y=TeX(r"($\beta$ in UIPC Regression)"),
-    title='Figure 4 - Estimated Effect of Yearly Change in Exchange Rate over Previous 4 Years on β',
+    title='Figure 4 - Estimated Effect of Yearly Change in Exchange Rate over Previous 6 Months on β',
     caption='Based on data from 1960-2007. Source: FRED'
   )+
   theme_classic() + geom_hline(yintercept = 1, linetype = "dashed")
-ggsave("plots/Fig4-UK_gradients_interplot.png", height = 5, width = 9)
+ggsave("plots/Fig4-UK_gradients_interplot_6_months.png", height = 5, width = 9)
 
 # need to remove the NA gradients so that reg and orig have the same number of data points
 final_df <- final_df %>% 
@@ -100,6 +100,6 @@ final_df <- final_df %>%
 
 orig <- lm(Pct.Diff.Exch.Rate ~ r_delta, data = final_df)
 summary(orig)
-(partial <- anova(orig, reg))
+partial <- anova(orig, reg)
 
-stargazer(reg, title = "Partial F-Statistic", label = "tab:partial", out = "latex/partial_f_stat.tex")
+stargazer(reg, title = "Partial F-Statistic", label = "tab:partial", out = "latex/partial_f_stat_6_months.tex")
