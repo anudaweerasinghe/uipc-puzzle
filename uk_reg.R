@@ -73,7 +73,7 @@ ggplot(data = final_df, aes(x = r_delta, y = Pct.Diff.Exch.Rate)) +
   theme_classic()+ 
   labs(
     x = TeX(r'($R_{\$} - R_{GBP}=$Percentage Difference between 10-year bond yield in the US and UK)'),
-    y =  TeX(r'($\frac{P_{\frac{\$}{GBP}}' - P_{\frac{\$}{GBP}}}{P_{\frac{\$}{GBP}}} \times 100\%$= Percentage Change in $P_{\frac{\$}{GBP}}$)'), 
+    y =  TeX(r'(Percentage Change in $P_{\frac{\$}{GBP}}$)'), 
     title = "Figure 2 - $/GBP Exchange Rates don't move as much as expected by UIPC",
     caption = "Based on data from 1960-2007. Source: FRED"
   )+geom_smooth(method = "lm", mapping = aes(x = r_delta, y = Pct.Diff.Exch.Rate), se = FALSE)
@@ -120,7 +120,7 @@ final_df %>% ggplot( aes(x = r_delta, y = Pct.Diff.Exch.Rate)) +
   theme_classic()+ 
   labs(
     x = TeX(r'($R_{\$} - R_{GBP}=$Percentage Difference between 10-year bond yield in the US and UK)'),
-    y =  TeX(r'($\frac{P_{\frac{\$}{GBP}}' - P_{\frac{\$}{GBP}}}{P_{\frac{\$}{GBP}}} \times 100\%$= Percentage Change in $P_{\frac{\$}{GBP}}$)'), 
+    y =  TeX(r'(Percentage Change in $P_{\frac{\$}{GBP}}$)'), 
     title = "Figure 3 - Agreement with UIPC differs by Decade for $/GBP",
     caption = "Based on data from 1960-2007. Source: FRED"
   )

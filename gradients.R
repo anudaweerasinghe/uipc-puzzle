@@ -86,9 +86,9 @@ summary(reg)
 stargazer(reg, title = "Interaction Regression Results", label = "tab:regression", out = "latex/interaction_results.tex")
 interplot(reg, var1 = "r_delta", var2 = "gradients") + 
   labs(
-    x='Yearly Change in USD to GBP Exchange Rate over Past Four Years',
+    x=TeX(r"($\frac{dP_{\$/GBP}}{dt} = $Yearly Change in $P_{\$/GBP}$ over Past Four Years)"),
     y=TeX(r"($\beta$ in UIPC Regression)"),
-    title='Figure 4 - Estimated Effect of Yearly Change in Exchange Rate over Previous 4 Years on β',
+    title='Figure 4 - UIPC is more likely to hold if GBP Appreciated in the Past Four Years',
     caption='Based on data from 1960-2007. Source: FRED'
   )+
   theme_classic() + geom_hline(yintercept = 1, linetype = "dashed")
